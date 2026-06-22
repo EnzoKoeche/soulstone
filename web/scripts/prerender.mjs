@@ -67,7 +67,7 @@ try {
 }
 
 const shell = readFileSync(join(DIST, "index.html"), "utf8");
-const urls = ["/", "/farm"];
+const urls = ["/", "/farm", "/build"];
 
 for (const it of items) {
   const slug = slugify(it.market_hash_name);
@@ -124,6 +124,25 @@ const farmHtml = shell
   .replace("</head>", `${farmMeta}</head>`);
 mkdirSync(join(DIST, "farm"), { recursive: true });
 writeFileSync(join(DIST, "farm", "index.html"), farmHtml);
+
+// /build — planner do Cube System
+const buildTitle = "Build planner (Cube System) — TBH | Soulstone";
+const buildDesc =
+  "Planejador de build do TBH: monte a party (classes) e veja o que o Cube System libera por nível. Referência da comunidade.";
+const buildSeo = `<main style="padding:1rem"><h1>Build planner — Cube System (TBH)</h1><p>Monte a party e veja o que o Cube System do Task Bar Hero libera por nível. Referência da comunidade. Carregando…</p></main>`;
+const buildMeta =
+  `<meta name="description" content="${esc(buildDesc)}">` +
+  `<link rel="canonical" href="${SITE}/build">` +
+  `<meta property="og:title" content="${esc(buildTitle)}">` +
+  `<meta property="og:description" content="${esc(buildDesc)}">` +
+  `<meta property="og:url" content="${SITE}/build">` +
+  `<meta property="og:type" content="website">`;
+const buildHtml = shell
+  .replace(/<title>[^<]*<\/title>/, `<title>${esc(buildTitle)}</title>`)
+  .replace('<div id="root"></div>', `<div id="root">${buildSeo}</div>`)
+  .replace("</head>", `${buildMeta}</head>`);
+mkdirSync(join(DIST, "build"), { recursive: true });
+writeFileSync(join(DIST, "build", "index.html"), buildHtml);
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
   .map((u) => `  <url><loc>${SITE}${u}</loc></url>`)

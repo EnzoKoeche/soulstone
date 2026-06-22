@@ -102,6 +102,12 @@ export function Home() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link
+            to="/build"
+            className="rounded-full border border-violet-500/40 bg-violet-500/10 px-3 py-1 text-xs text-violet-300 hover:bg-violet-500/20"
+          >
+            🧊 Builds →
+          </Link>
+          <Link
             to="/farm"
             className="rounded-full border border-violet-500/40 bg-violet-500/10 px-3 py-1 text-xs text-violet-300 hover:bg-violet-500/20"
           >
