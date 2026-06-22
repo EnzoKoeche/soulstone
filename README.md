@@ -19,6 +19,12 @@
 
 </div>
 
+<div align="center">
+  <img src="docs/screenshot.png" alt="Soulstone — live Steam Market dashboard for TBH, showing highest-value items, a price chart and market status" width="840" />
+  <br/>
+  <sub>Live data from the public Steam Market — highest‑value items, price history, and market status.</sub>
+</div>
+
 ---
 
 > ## 🚫 Non‑negotiable principle · Princípio inegociável
