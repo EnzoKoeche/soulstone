@@ -2,14 +2,15 @@
 //
 // Composição: lê env → (freshness guard) → busca tudo da Steam (steam.ts →
 // parser.ts) → upsert em `items` + insert em `price_snapshots` → carimba
-// `market_status`. Agendado via pg_cron a cada 30min (ver ../../README.md). NÃO é
-// importado pelos testes: usa APIs do Deno e o supabase-js; a lógica testável
-// vive em parser.ts/steam.ts.
+// `market_status` → checa alertas (alerts.ts). Agendado via pg_cron a cada 30min
+// (ver ../../README.md). NÃO é importado pelos testes: usa APIs do Deno e o
+// supabase-js; a lógica testável vive em parser.ts/steam.ts/alerts.ts.
 //
 // supabase-js via JSR (recomendado no runtime atual). Alternativas equivalentes:
 //   import { createClient } from "npm:@supabase/supabase-js@2";
 //   import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { checkAlerts } from "./alerts.ts";
 import { fetchAllItems } from "./steam.ts";
 
 function env(name: string, fallback?: string): string {
@@ -81,11 +82,30 @@ Deno.serve(async (): Promise<Response> => {
     if (insert.error) throw insert.error;
 
     // Atualiza só o carimbo de tempo. listings_open/note são CURADOS (política do
-    // jogo — search/render não distingue "novas listagens fechadas": itens já
-    // listados seguem à venda mesmo com o mercado fechado). FR-07.
+    // jogo — search/render não distingue "novas listagens fechadas"). FR-07.
     await supabase.from("market_status").update({ updated_at: now }).eq("id", 1);
 
-    return Response.json({ ok: true, items: items.length, captured_at: now });
+    // Alertas: posta no Discord/Telegram se algum item cruzou o alvo.
+    // Não pode derrubar a coleta → isolado em try/catch.
+    let alertsSent = 0;
+    try {
+      const priceByName = new Map(
+        items.map((i) => [
+          i.marketHashName,
+          { price: i.sellPriceCents, displayName: i.displayName },
+        ]),
+      );
+      alertsSent = await checkAlerts(supabase, priceByName, Date.now());
+    } catch (alertErr) {
+      console.error("alertas falharam:", alertErr);
+    }
+
+    return Response.json({
+      ok: true,
+      items: items.length,
+      alerts_sent: alertsSent,
+      captured_at: now,
+    });
   } catch (err) {
     console.error("poller falhou:", err);
     const message = err instanceof Error ? err.message : JSON.stringify(err);
