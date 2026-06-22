@@ -106,6 +106,25 @@ const homeHtml = shell.replace(
 );
 writeFileSync(join(DIST, "index.html"), homeHtml);
 
+// /farm — prerender p/ funcionar em navegação direta + ser indexável
+const farmTitle = "Melhor stage pra farmar agora — valor/hora | Soulstone (TBH)";
+const farmDesc =
+  "Ranking de stages do TBH por valor estimado por hora usando os preços ao vivo do Steam Market. Estimativas da comunidade; preços reais.";
+const farmSeo = `<main style="padding:1rem"><h1>Valor de farm por hora — TBH</h1><p>Stages ranqueados por valor estimado por hora, usando os preços ao vivo do Steam Market. Estimativas da comunidade; preços reais. Carregando…</p></main>`;
+const farmMeta =
+  `<meta name="description" content="${esc(farmDesc)}">` +
+  `<link rel="canonical" href="${SITE}/farm">` +
+  `<meta property="og:title" content="${esc(farmTitle)}">` +
+  `<meta property="og:description" content="${esc(farmDesc)}">` +
+  `<meta property="og:url" content="${SITE}/farm">` +
+  `<meta property="og:type" content="website">`;
+const farmHtml = shell
+  .replace(/<title>[^<]*<\/title>/, `<title>${esc(farmTitle)}</title>`)
+  .replace('<div id="root"></div>', `<div id="root">${farmSeo}</div>`)
+  .replace("</head>", `${farmMeta}</head>`);
+mkdirSync(join(DIST, "farm"), { recursive: true });
+writeFileSync(join(DIST, "farm", "index.html"), farmHtml);
+
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
   .map((u) => `  <url><loc>${SITE}${u}</loc></url>`)
   .join("\n")}\n</urlset>\n`;
