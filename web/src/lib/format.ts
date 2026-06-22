@@ -61,3 +61,13 @@ export function priceChange(
   const tone: ChangeTone = pct > 0 ? "up" : pct < 0 ? "down" : "none";
   return { label: `${pct > 0 ? "+" : ""}${pct.toFixed(1)}%`, tone };
 }
+
+/** Slug estável p/ a URL do item: "Dusk Bow (Legendary) A" → "dusk-bow-legendary-a". */
+export function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}

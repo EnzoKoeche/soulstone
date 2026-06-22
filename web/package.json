@@ -5,14 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "build:pages": "tsc --noEmit && vite build --base=/soulstone/",
+    "build": "tsc --noEmit && vite build && node scripts/prerender.mjs",
+    "build:pages": "tsc --noEmit && vite build --base=/soulstone/ && cp dist/index.html dist/404.html",
     "preview": "vite preview"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
     "recharts": "^2.13.0"
   },
   "devDependencies": {

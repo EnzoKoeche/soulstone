@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   Area,
   AreaChart,
@@ -89,7 +90,7 @@ function ChartBody({
   );
 }
 
-export function PriceChart({ item }: { item: ItemLatest | null }) {
+export function PriceChart({ item, pageHref }: { item: ItemLatest | null; pageHref?: string }) {
   const { data, loading, error } = useItemHistory(item?.market_hash_name ?? null);
 
   if (!item) {
@@ -116,9 +117,16 @@ export function PriceChart({ item }: { item: ItemLatest | null }) {
         >
           {item.display_name}
         </h2>
-        <span className="font-mono font-semibold text-emerald-300">
-          {centsToUsd(item.sell_price_cents)}
-        </span>
+        <div className="flex items-baseline gap-3">
+          {pageHref ? (
+            <Link to={pageHref} className="text-xs text-violet-400 hover:underline">
+              página ↗
+            </Link>
+          ) : null}
+          <span className="font-mono font-semibold text-emerald-300">
+            {centsToUsd(item.sell_price_cents)}
+          </span>
+        </div>
       </div>
       <div className="min-h-72 flex-1 p-2">
         <ChartBody loading={loading} error={error} series={series} />
