@@ -1,60 +1,85 @@
 import { useState } from "react";
 import { CenterMessage, Panel, Spinner } from "./components/common";
+import { ListControls, type SortKey } from "./components/ListControls";
 import { MarketStatusBanner } from "./components/MarketStatusBanner";
 import { PriceChart } from "./components/PriceChart";
 import { TopItemsList } from "./components/TopItemsList";
 import { useTopItems } from "./hooks/useTopItems";
-import type { ItemLatest } from "./lib/types";
-
-interface TopState {
-  data: ItemLatest[] | null;
-  loading: boolean;
-  error: string | null;
-}
+import { baseCategory, rarityOf } from "./lib/format";
 
 function isConfigError(message: string): boolean {
   return /não configurado/i.test(message);
 }
 
-function ItemsPanelBody({
-  top,
-  selected,
-  onSelect,
-}: {
-  top: TopState;
-  selected: string | null;
-  onSelect: (name: string) => void;
-}) {
-  if (top.loading) return <Spinner label="Carregando itens…" />;
-  if (top.error) {
-    if (isConfigError(top.error)) {
-      return (
-        <CenterMessage
-          title="Configure o Supabase"
-          detail="Copie web/.env.example para web/.env e preencha VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY."
-        />
-      );
-    }
-    return <CenterMessage title="Erro ao carregar" detail={top.error} />;
-  }
-  if (!top.data || top.data.length === 0) {
-    return (
-      <CenterMessage
-        title="Nenhum item ainda"
-        detail="Rode o poller para popular o banco de dados."
-      />
-    );
-  }
-  return <TopItemsList items={top.data} selected={selected} onSelect={onSelect} />;
-}
-
 export default function App() {
   const top = useTopItems();
   const [picked, setPicked] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortKey>("price_desc");
+  const [category, setCategory] = useState("");
+  const [rarity, setRarity] = useState("");
 
   const items = top.data ?? [];
-  const selectedName = picked ?? items.at(0)?.market_hash_name ?? null;
+  const categories = [...new Set(items.map((i) => baseCategory(i.type)))].sort();
+  const rarities = [
+    ...new Set(items.map((i) => rarityOf(i.display_name)).filter((r): r is string => r !== null)),
+  ].sort();
+
+  const query = search.trim().toLowerCase();
+  const filtered = items
+    .filter((i) => (query ? i.display_name.toLowerCase().includes(query) : true))
+    .filter((i) => (category ? baseCategory(i.type) === category : true))
+    .filter((i) => (rarity ? rarityOf(i.display_name) === rarity : true))
+    .sort((a, b) => {
+      if (sort === "price_asc") return a.sell_price_cents - b.sell_price_cents;
+      if (sort === "listings_desc") return b.sell_listings - a.sell_listings;
+      return b.sell_price_cents - a.sell_price_cents;
+    });
+
+  const selectedName =
+    picked ?? filtered.at(0)?.market_hash_name ?? items.at(0)?.market_hash_name ?? null;
   const selectedItem = items.find((i) => i.market_hash_name === selectedName) ?? null;
+
+  function itemsBody() {
+    if (top.loading) return <Spinner label="Carregando itens…" />;
+    if (top.error) {
+      if (isConfigError(top.error)) {
+        return (
+          <CenterMessage
+            title="Configure o Supabase"
+            detail="Copie web/.env.example para web/.env e preencha VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY."
+          />
+        );
+      }
+      return <CenterMessage title="Erro ao carregar" detail={top.error} />;
+    }
+    if (items.length === 0) {
+      return <CenterMessage title="Nenhum item ainda" detail="O poller vai popular o banco." />;
+    }
+    return (
+      <>
+        <ListControls
+          search={search}
+          onSearch={setSearch}
+          sort={sort}
+          onSort={setSort}
+          category={category}
+          onCategory={setCategory}
+          categories={categories}
+          rarity={rarity}
+          onRarity={setRarity}
+          rarities={rarities}
+          shown={filtered.length}
+          total={items.length}
+        />
+        {filtered.length === 0 ? (
+          <CenterMessage title="Nada com esses filtros" detail="Ajuste a busca ou os filtros." />
+        ) : (
+          <TopItemsList items={filtered} selected={selectedName} onSelect={setPicked} />
+        )}
+      </>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
@@ -77,9 +102,9 @@ export default function App() {
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
         <Panel className="flex flex-col overflow-hidden">
           <h2 className="border-b border-zinc-800 px-4 py-3 text-sm font-semibold text-zinc-300">
-            Itens de maior valor
+            Itens do mercado
           </h2>
-          <ItemsPanelBody top={top} selected={selectedName} onSelect={setPicked} />
+          {itemsBody()}
         </Panel>
 
         <Panel className="overflow-hidden">
@@ -88,7 +113,7 @@ export default function App() {
       </div>
 
       <footer className="mt-8 border-t border-zinc-900 pt-4 text-center text-xs text-zinc-600">
-        Dados públicos do Steam Community Market · Soulstone não interage com o jogo · v0.1
+        Dados públicos do Steam Community Market · Soulstone não interage com o jogo · v0.2
       </footer>
     </div>
   );

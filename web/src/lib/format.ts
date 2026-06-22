@@ -37,3 +37,14 @@ export function shortTime(iso: string): string {
     minute: "2-digit",
   });
 }
+
+/** Tipo "base" sem o nível: "Bow - Lv. 30" → "Bow"; "Crafting Material" fica igual. */
+export function baseCategory(type: string | null): string {
+  if (!type) return "Outros";
+  return type.replace(/\s*-\s*Lv\.?\s*\d+.*$/i, "").trim() || "Outros";
+}
+
+/** Raridade extraída do nome: "Dusk Bow (Legendary) A" → "Legendary". */
+export function rarityOf(name: string): string | null {
+  return name.match(/\(([^)]+)\)/)?.[1] ?? null;
+}

@@ -4,7 +4,7 @@ import type { ItemLatest, MarketStatus, PricePoint } from "./types";
 const NOT_CONFIGURED = "Supabase não configurado";
 
 /** Itens de maior valor: último preço por item (view item_latest), ordenado. */
-export async function fetchTopItems(limit = 40): Promise<ItemLatest[]> {
+export async function fetchTopItems(limit = 300): Promise<ItemLatest[]> {
   if (!supabase) throw new Error(NOT_CONFIGURED);
   const { data, error } = await supabase
     .from("item_latest")
