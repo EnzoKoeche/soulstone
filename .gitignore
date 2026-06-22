@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Builds
+dist/
+web/dist/
+*.tsbuildinfo
+
+# Env (nunca commitar segredos — só .env.example é versionado)
+.env
+.env.local
+.env.*.local
+web/.env
+web/.env.local
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# Test / coverage
+coverage/
+
+# Misc
+*.log
+.DS_Store
+.vscode/
+.idea/

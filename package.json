@@ -1,0 +1,19 @@
+{
+  "name": "soulstone",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "TBH Companion — Steam Market price tracker. Public market data only; never touches the game.",
+  "scripts": {
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^4.0.0"
+  }
+}

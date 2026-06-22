@@ -1,0 +1,9 @@
+# Supabase — config local mínima.
+# Se for rodar o stack local (`supabase start`), complemente com `supabase init`.
+# Na v0.1 não precisamos rodar em produção — esta config existe só para
+# `supabase functions serve poller` e referência do projeto.
+project_id = "soulstone"
+
+[functions.poller]
+# Função disparada por pg_cron (sem usuário) — não exige JWT.
+verify_jwt = false
