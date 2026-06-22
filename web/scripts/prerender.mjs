@@ -67,7 +67,7 @@ try {
 }
 
 const shell = readFileSync(join(DIST, "index.html"), "utf8");
-const urls = ["/"];
+const urls = ["/", "/farm"];
 
 for (const it of items) {
   const slug = slugify(it.market_hash_name);

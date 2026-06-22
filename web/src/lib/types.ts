@@ -26,3 +26,21 @@ export interface MarketStatus {
   note: string | null;
   updated_at: string;
 }
+
+export interface StageFarmValue {
+  stage_id: string;
+  name: string;
+  act: number | null;
+  difficulty: string | null;
+  clears_per_hour: number;
+  note: string | null;
+  source: string | null;
+  value_per_run_cents: number;
+  value_per_hour_cents: number;
+}
+
+export interface StageDrop {
+  stage_id: string;
+  market_hash_name: string;
+  drops_per_run: number;
+}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { CenterMessage, Panel, Spinner } from "../components/common";
 import { ListControls, type SortKey } from "../components/ListControls";
 import { MarketStatusBanner } from "../components/MarketStatusBanner";
@@ -99,9 +100,17 @@ export function Home() {
           </h1>
           <p className="text-sm text-zinc-400">Rastreador de preços do Steam Market · TBH</p>
         </div>
-        <span className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs text-zinc-400">
-          🔌 Só dados públicos · não toca no jogo
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            to="/farm"
+            className="rounded-full border border-violet-500/40 bg-violet-500/10 px-3 py-1 text-xs text-violet-300 hover:bg-violet-500/20"
+          >
+            💰 Valor de farm →
+          </Link>
+          <span className="rounded-full border border-zinc-800 bg-zinc-900 px-3 py-1 text-xs text-zinc-400">
+            🔌 Só dados públicos · não toca no jogo
+          </span>
+        </div>
       </header>
 
       <div className="mt-4">

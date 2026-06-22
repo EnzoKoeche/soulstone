@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { ItemLatest, MarketStatus, PricePoint } from "./types";
+import type { ItemLatest, MarketStatus, PricePoint, StageDrop, StageFarmValue } from "./types";
 
 const NOT_CONFIGURED = "Supabase não configurado";
 
@@ -38,4 +38,37 @@ export async function fetchMarketStatus(): Promise<MarketStatus | null> {
     .maybeSingle();
   if (error) throw new Error(error.message);
   return data;
+}
+
+/** Valor/hora estimado por stage (view stage_farm_value, com preços ao vivo). */
+export async function fetchStageFarmValue(): Promise<StageFarmValue[]> {
+  if (!supabase) throw new Error(NOT_CONFIGURED);
+  const { data, error } = await supabase
+    .from("stage_farm_value")
+    .select("*")
+    .order("value_per_hour_cents", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r) => ({
+    stage_id: r.stage_id,
+    name: r.name,
+    act: r.act,
+    difficulty: r.difficulty,
+    clears_per_hour: Number(r.clears_per_hour),
+    note: r.note,
+    source: r.source,
+    value_per_run_cents: Number(r.value_per_run_cents),
+    value_per_hour_cents: Number(r.value_per_hour_cents),
+  }));
+}
+
+/** Drops por stage (estimativas da comunidade). */
+export async function fetchStageDrops(): Promise<StageDrop[]> {
+  if (!supabase) throw new Error(NOT_CONFIGURED);
+  const { data, error } = await supabase.from("stage_drops").select("*");
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r) => ({
+    stage_id: r.stage_id,
+    market_hash_name: r.market_hash_name,
+    drops_per_run: Number(r.drops_per_run),
+  }));
 }
