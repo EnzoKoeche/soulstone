@@ -5,7 +5,7 @@ import { defineConfig } from "vitest/config";
 // e também é importável pela Edge Function (Deno). Nunca bate na Steam real (NFR-01).
 export default defineConfig({
   test: {
-    include: ["supabase/functions/**/*.test.ts"],
+    include: ["supabase/functions/**/*.test.ts", "web/src/**/*.test.ts"],
     environment: "node",
     passWithNoTests: true,
   },

@@ -7,13 +7,16 @@ import { hasMorePages, type ParsedItem, parseSearchRenderPage } from "./parser.t
 
 const SEARCH_RENDER_URL = "https://steamcommunity.com/market/search/render/";
 const USER_AGENT = "Soulstone/0.1 (Steam Market price tracker; respects rate limits)";
-// Trava de segurança: nunca paginar além disto, mesmo se total_count vier errado.
-const MAX_PAGES = 60;
+// Trava de segurança: o catálogo tem ~16 páginas (×10). Teto baixo para que um
+// total_count adulterado/grande não vire dezenas de hits na Steam (NFR-01).
+const MAX_PAGES = 25;
+// Aborta um fetch travado em vez de prender a invocação até o limite da função.
+const FETCH_TIMEOUT_MS = 15_000;
 
 /** Mínimo que precisamos de um fetch — facilita injetar mock nos testes. */
 export type Fetcher = (
   url: string,
-  init?: { headers?: Record<string, string> },
+  init?: { headers?: Record<string, string>; signal?: AbortSignal },
 ) => Promise<Response>;
 
 export interface PollerConfig {
@@ -53,7 +56,10 @@ export async function fetchWithBackoff(url: string, cfg: PollerConfig): Promise<
 
   let attempt = 0;
   while (attempt <= cfg.maxRetries) {
-    const res = await doFetch(url, { headers: { "User-Agent": USER_AGENT } });
+    const res = await doFetch(url, {
+      headers: { "User-Agent": USER_AGENT },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
     if (res.status !== 429) {
       if (!res.ok) throw new Error(`Steam respondeu HTTP ${res.status}`);
       return res;

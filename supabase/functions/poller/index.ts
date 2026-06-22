@@ -1,9 +1,10 @@
 // Entry point da Edge Function (Deno) do poller.
 //
-// Composição: lê env → busca tudo da Steam (steam.ts → parser.ts) → upsert em
-// `items` + insert em `price_snapshots` → atualiza `market_status`. Agendado via
-// pg_cron a cada 30min (ver ../../README.md). NÃO é importado pelos testes:
-// usa APIs do Deno e o supabase-js; a lógica testável vive em parser.ts/steam.ts.
+// Composição: lê env → (freshness guard) → busca tudo da Steam (steam.ts →
+// parser.ts) → upsert em `items` + insert em `price_snapshots` → carimba
+// `market_status`. Agendado via pg_cron a cada 30min (ver ../../README.md). NÃO é
+// importado pelos testes: usa APIs do Deno e o supabase-js; a lógica testável
+// vive em parser.ts/steam.ts.
 //
 // supabase-js via JSR (recomendado no runtime atual). Alternativas equivalentes:
 //   import { createClient } from "npm:@supabase/supabase-js@2";
@@ -17,10 +18,25 @@ function env(name: string, fallback?: string): string {
   return value;
 }
 
+const FRESH_WINDOW_MS = 25 * 60 * 1000;
+
 Deno.serve(async (): Promise<Response> => {
   try {
     const currency = Number(env("STEAM_CURRENCY", "1"));
     const supabase = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"));
+
+    // Freshness guard: o endpoint é público (verify_jwt=false), então qualquer um
+    // pode dispará-lo. Se a última coleta foi há <25min, sai cedo SEM bater na
+    // Steam nem inserir — limita o abuso a no máx. 1 coleta real por ~25min (NFR-01).
+    const { data: last } = await supabase
+      .from("price_snapshots")
+      .select("captured_at")
+      .order("captured_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (last && Date.now() - new Date(last.captured_at).getTime() < FRESH_WINDOW_MS) {
+      return Response.json({ ok: true, skipped: true, reason: "coleta recente (<25min)" });
+    }
 
     const items = await fetchAllItems({
       appid: env("STEAM_APPID", "3678970"),
