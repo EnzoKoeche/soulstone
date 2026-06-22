@@ -26,7 +26,7 @@ Deno.serve(async (): Promise<Response> => {
       appid: env("STEAM_APPID", "3678970"),
       currency,
       count: 100,
-      pageDelayMs: Number(env("POLL_PAGE_DELAY_MS", "2500")),
+      pageDelayMs: Number(env("POLL_PAGE_DELAY_MS", "1200")),
       maxRetries: 5,
     });
 
@@ -73,7 +73,7 @@ Deno.serve(async (): Promise<Response> => {
     return Response.json({ ok: true, items: items.length, captured_at: now });
   } catch (err) {
     console.error("poller falhou:", err);
-    const message = err instanceof Error ? err.message : String(err);
+    const message = err instanceof Error ? err.message : JSON.stringify(err);
     return Response.json({ ok: false, error: message }, { status: 500 });
   }
 });

@@ -87,4 +87,24 @@ describe("fetchAllItems (pagina até cobrir total_count)", () => {
     const starts = fetchImpl.mock.calls.map((c) => Number(new URL(c[0]).searchParams.get("start")));
     expect(starts).toEqual([0, 10, 20]);
   });
+
+  it("dedup itens repetidos entre páginas (mercado re-ordena durante a coleta)", async () => {
+    // "dup" aparece na página 0 E na página 1 — sem dedup, o upsert quebraria
+    // com "ON CONFLICT DO UPDATE command cannot affect row a second time".
+    const mk = (name: string) => ({
+      hash_name: name,
+      sell_price: 100,
+      sell_listings: 1,
+      asset_description: { market_hash_name: name, name },
+    });
+    const fetchImpl = vi.fn(async (url: string) => {
+      const start = Number(new URL(url).searchParams.get("start"));
+      const results = start === 0 ? [mk("dup"), mk("a")] : [mk("dup"), mk("b")];
+      return jsonResponse({ success: true, start, pagesize: 2, total_count: 4, results });
+    });
+
+    const items = await fetchAllItems({ ...baseCfg, fetchImpl, sleep: async () => {} });
+
+    expect(items.map((i) => i.marketHashName).sort()).toEqual(["a", "b", "dup"]);
+  });
 });

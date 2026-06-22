@@ -92,5 +92,10 @@ export async function fetchAllItems(cfg: PollerConfig): Promise<ParsedItem[]> {
     await sleep(cfg.pageDelayMs);
   }
 
-  return all;
+  // O mercado vivo re-ordena entre as páginas (a coleta leva ~20s), então o
+  // mesmo item pode cair em duas páginas. Dedup por marketHashName (last-wins)
+  // evita "ON CONFLICT DO UPDATE command cannot affect row a second time" no upsert.
+  const byKey = new Map<string, ParsedItem>();
+  for (const item of all) byKey.set(item.marketHashName, item);
+  return [...byKey.values()];
 }

@@ -5,7 +5,7 @@
 **Live Steam Market price tracker & companion for [*TBH: Task Bar Hero*](https://store.steampowered.com/app/3678970/)**
 
 [![CI](https://github.com/EnzoKoeche/soulstone/actions/workflows/ci.yml/badge.svg)](https://github.com/EnzoKoeche/soulstone/actions/workflows/ci.yml)
-[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://enzokoeche.github.io/soulstone/)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://soulstone-sooty.vercel.app/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
@@ -13,7 +13,7 @@
 ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38BDF8?logo=tailwindcss&logoColor=white)
 
-### 🚀 [**Live Demo →**](https://enzokoeche.github.io/soulstone/)
+### 🚀 [**Live Demo →**](https://soulstone-sooty.vercel.app/)
 
 [English](#english) · [Português](#português)
 
