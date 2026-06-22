@@ -42,7 +42,7 @@
 
 Steam has **no inbound webhooks**, and its full price history requires a login. So Soulstone **builds the history itself** by snapshotting the public `search/render` endpoint on a schedule. That time series *is* the product.
 
-### ✨ Features (v0.1)
+### ✨ Features
 - ⏱️ **Poller** (Supabase Edge Function) — paginates the Steam Market, respects rate limits (delay + 429 backoff), with an **isolated, unit‑tested parser**.
 - 🗄️ **Postgres time series** — every poll is a timestamped snapshot; RLS keeps it public‑read.
 - 📊 **Single‑page dashboard** — highest‑value items, a **price × time chart**, and live market status. Rarity‑colored, dark, fast.
@@ -63,12 +63,14 @@ Copy `.env.example` → `.env` (root, for the poller) and `web/.env` (frontend) 
 ### 🗺️ Roadmap
 | Version | Delivery |
 | --- | --- |
-| **v0.1** ✅ | Poller + DB + single page with a chart of the top items |
-| v0.2 | Full filterable list of ~150 items + 24h/7d change + sortable |
-| v0.3 | Per‑item page + basic SEO |
-| v0.4 | Drop tables + farm value/hour ("best stage right now") |
-| v0.5 | Discord/Telegram price alerts |
-| v1.0 | Build planner (Cube System) |
+| **v0.1** ✅ | Poller + DB + single page with a price chart |
+| **v0.2** ✅ | Full filterable/sortable list + 24h/7d change |
+| **v0.3** ✅ | Per‑item page + basic SEO (prerendered + sitemap) |
+| **v0.4** ✅ | Drop tables + farm value/hour — [`/farm`](https://soulstone-sooty.vercel.app/farm) |
+| **v0.5** ✅ | Discord/Telegram price alerts |
+| **v1.0** ✅ | Build planner — Cube System — [`/build`](https://soulstone-sooty.vercel.app/build) |
+
+**The whole roadmap is shipped and live.** 🎉
 
 ---
 
@@ -78,7 +80,7 @@ O **TBH: Task Bar Hero** é um idle RPG free‑to‑play que viralizou na Steam 
 
 A Steam **não tem webhooks de entrada**, e o histórico completo exige login. Então o Soulstone **constrói o histórico sozinho**, snapshotando o endpoint público `search/render` de tempos em tempos. Essa série temporal *é* o produto.
 
-### ✨ Funcionalidades (v0.1)
+### ✨ Funcionalidades
 - ⏱️ **Poller** (Supabase Edge Function) — pagina o Steam Market, respeita rate limit (delay + backoff em 429), com um **parser isolado e testado**.
 - 🗄️ **Série temporal no Postgres** — cada coleta é um snapshot com timestamp; RLS mantém leitura pública.
 - 📊 **Dashboard de página única** — itens de maior valor, **gráfico de preço × tempo** e status do mercado ao vivo. Dark, rápido, com cores de raridade.
