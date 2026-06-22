@@ -67,7 +67,7 @@ try {
 }
 
 const shell = readFileSync(join(DIST, "index.html"), "utf8");
-const urls = ["/", "/farm", "/build"];
+const urls = ["/", "/farm", "/build", "/alerts"];
 
 for (const it of items) {
   const slug = slugify(it.market_hash_name);
@@ -143,6 +143,25 @@ const buildHtml = shell
   .replace("</head>", `${buildMeta}</head>`);
 mkdirSync(join(DIST, "build"), { recursive: true });
 writeFileSync(join(DIST, "build", "index.html"), buildHtml);
+
+// /alerts — criar alerta de preço
+const alertsTitle = "Criar alerta de preço (Discord) — TBH | Soulstone";
+const alertsDesc =
+  "Crie um alerta de preço do Steam Market do TBH: item + preço-alvo + webhook do Discord. Notifica quando o preço cruzar.";
+const alertsSeo = `<main style="padding:1rem"><h1>Criar alerta de preço — TBH</h1><p>Escolha um item, o preço-alvo e cole o webhook do seu Discord. O Soulstone te notifica quando o preço do Steam Market cruzar. Carregando…</p></main>`;
+const alertsMeta =
+  `<meta name="description" content="${esc(alertsDesc)}">` +
+  `<link rel="canonical" href="${SITE}/alerts">` +
+  `<meta property="og:title" content="${esc(alertsTitle)}">` +
+  `<meta property="og:description" content="${esc(alertsDesc)}">` +
+  `<meta property="og:url" content="${SITE}/alerts">` +
+  `<meta property="og:type" content="website">`;
+const alertsHtml = shell
+  .replace(/<title>[^<]*<\/title>/, `<title>${esc(alertsTitle)}</title>`)
+  .replace('<div id="root"></div>', `<div id="root">${alertsSeo}</div>`)
+  .replace("</head>", `${alertsMeta}</head>`);
+mkdirSync(join(DIST, "alerts"), { recursive: true });
+writeFileSync(join(DIST, "alerts", "index.html"), alertsHtml);
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
   .map((u) => `  <url><loc>${SITE}${u}</loc></url>`)

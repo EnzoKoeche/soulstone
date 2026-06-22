@@ -8,6 +8,7 @@ const base: PriceAlert = {
   direction: "above",
   enabled: true,
   last_triggered_at: null,
+  discord_webhook_url: null,
 };
 
 const NOW = 1_700_000_000_000;

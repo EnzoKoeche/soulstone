@@ -72,3 +72,22 @@ export async function fetchStageDrops(): Promise<StageDrop[]> {
     drops_per_run: Number(r.drops_per_run),
   }));
 }
+
+/** Cria um alerta de preço via a edge function pública create-alert. */
+export async function createAlert(payload: {
+  market_hash_name: string;
+  target_price_cents: number;
+  direction: "below" | "above";
+  discord_webhook_url: string;
+}): Promise<void> {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY ?? "";
+  if (!url) throw new Error(NOT_CONFIGURED);
+  const res = await fetch(`${url}/functions/v1/create-alert`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: key, Authorization: `Bearer ${key}` },
+    body: JSON.stringify(payload),
+  });
+  const data = (await res.json().catch(() => ({}))) as { error?: string };
+  if (!res.ok) throw new Error(data.error ?? `Erro ${res.status}`);
+}

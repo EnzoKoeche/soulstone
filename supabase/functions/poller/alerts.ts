@@ -9,6 +9,7 @@ export interface PriceAlert {
   direction: "below" | "above";
   enabled: boolean;
   last_triggered_at: string | null;
+  discord_webhook_url: string | null;
 }
 
 export interface AlertConfig {
@@ -108,11 +109,11 @@ export async function checkAlerts(
   nowMs: number,
 ): Promise<number> {
   const { data: config } = await db.from("alert_config").select("*").eq("id", 1).maybeSingle();
-  const cfg = config as AlertConfig | null;
-  if (!cfg) return 0;
-  const hasDiscord = Boolean(cfg.discord_webhook_url);
-  const hasTelegram = Boolean(cfg.telegram_bot_token && cfg.telegram_chat_id);
-  if (!hasDiscord && !hasTelegram) return 0;
+  const cfg = (config as AlertConfig | null) ?? {
+    discord_webhook_url: null,
+    telegram_bot_token: null,
+    telegram_chat_id: null,
+  };
 
   const { data: alerts } = await db.from("price_alerts").select("*").eq("enabled", true);
   if (!alerts) return 0;
@@ -122,10 +123,20 @@ export async function checkAlerts(
     const info = priceByName.get(alert.market_hash_name);
     if (!info || !shouldTrigger(alert, info.price, nowMs)) continue;
     const message = formatAlertMessage(alert, info.displayName, info.price);
-    if (cfg.discord_webhook_url) await postDiscord(cfg.discord_webhook_url, message);
+
+    // webhook do PRÓPRIO alerta (self-service) ou o global (fallback do seed).
+    const webhook = alert.discord_webhook_url ?? cfg.discord_webhook_url;
+    let delivered = false;
+    if (webhook) {
+      await postDiscord(webhook, message);
+      delivered = true;
+    }
     if (cfg.telegram_bot_token && cfg.telegram_chat_id) {
       await postTelegram(cfg.telegram_bot_token, cfg.telegram_chat_id, message);
+      delivered = true;
     }
+    if (!delivered) continue;
+
     await db
       .from("price_alerts")
       .update({
