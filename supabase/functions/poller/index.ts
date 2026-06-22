@@ -64,11 +64,10 @@ Deno.serve(async (): Promise<Response> => {
     const insert = await supabase.from("price_snapshots").insert(snapshotRows);
     if (insert.error) throw insert.error;
 
-    // refresca o status do mercado (FR-07)
-    await supabase
-      .from("market_status")
-      .update({ note: `${items.length} itens coletados`, updated_at: now })
-      .eq("id", 1);
+    // Atualiza só o carimbo de tempo. listings_open/note são CURADOS (política do
+    // jogo — search/render não distingue "novas listagens fechadas": itens já
+    // listados seguem à venda mesmo com o mercado fechado). FR-07.
+    await supabase.from("market_status").update({ updated_at: now }).eq("id", 1);
 
     return Response.json({ ok: true, items: items.length, captured_at: now });
   } catch (err) {

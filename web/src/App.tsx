@@ -20,6 +20,7 @@ export default function App() {
   const [rarity, setRarity] = useState("");
 
   const items = top.data ?? [];
+  const totalListings = items.reduce((sum, i) => sum + i.sell_listings, 0);
   const categories = [...new Set(items.map((i) => baseCategory(i.type)))].sort();
   const rarities = [
     ...new Set(items.map((i) => rarityOf(i.display_name)).filter((r): r is string => r !== null)),
@@ -96,7 +97,7 @@ export default function App() {
       </header>
 
       <div className="mt-4">
-        <MarketStatusBanner />
+        <MarketStatusBanner itemsCount={items.length} totalListings={totalListings} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">

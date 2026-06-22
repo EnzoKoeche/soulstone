@@ -10,6 +10,9 @@ export interface ItemLatest {
   sell_listings: number;
   currency: number;
   captured_at: string;
+  /** Preço ~24h/7d atrás (null se ainda não há histórico tão antigo). */
+  price_24h: number | null;
+  price_7d: number | null;
 }
 
 export interface PricePoint {

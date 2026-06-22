@@ -48,3 +48,16 @@ export function baseCategory(type: string | null): string {
 export function rarityOf(name: string): string | null {
   return name.match(/\(([^)]+)\)/)?.[1] ?? null;
 }
+
+export type ChangeTone = "up" | "down" | "none";
+
+/** Variação % entre o preço atual e um anterior. "—" quando não há base ainda. */
+export function priceChange(
+  current: number,
+  previous: number | null | undefined,
+): { label: string; tone: ChangeTone } {
+  if (previous == null || previous === 0) return { label: "—", tone: "none" };
+  const pct = Math.round(((current - previous) / previous) * 1000) / 10;
+  const tone: ChangeTone = pct > 0 ? "up" : pct < 0 ? "down" : "none";
+  return { label: `${pct > 0 ? "+" : ""}${pct.toFixed(1)}%`, tone };
+}

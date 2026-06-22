@@ -1,4 +1,4 @@
-import { centsToUsd, steamIconUrl } from "../lib/format";
+import { centsToUsd, priceChange, steamIconUrl } from "../lib/format";
 import type { ItemLatest } from "../lib/types";
 
 export function ItemRow({
@@ -14,6 +14,13 @@ export function ItemRow({
 }) {
   const icon = steamIconUrl(item.icon_url);
   const nameColor = item.rarity_color ? `#${item.rarity_color}` : "#e4e4e7";
+  const change = priceChange(item.sell_price_cents, item.price_24h);
+  const changeClass =
+    change.tone === "up"
+      ? "text-emerald-400"
+      : change.tone === "down"
+        ? "text-rose-400"
+        : "text-zinc-600";
 
   return (
     <button
@@ -46,6 +53,7 @@ export function ItemRow({
         <span className="block text-xs text-zinc-500">
           {item.sell_listings.toLocaleString("pt-BR")} à venda
         </span>
+        <span className={`block text-xs ${changeClass}`}>24h {change.label}</span>
       </span>
     </button>
   );
