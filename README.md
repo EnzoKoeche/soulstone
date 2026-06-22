@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🎮 Soulstone
+<img src="docs/logo.png" alt="Soulstone" width="320" />
+
+# Soulstone
 
 **Live Steam Market price tracker & companion for [*TBH: Task Bar Hero*](https://store.steampowered.com/app/3678970/)**
 
