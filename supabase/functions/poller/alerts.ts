@@ -10,6 +10,8 @@ export interface PriceAlert {
   enabled: boolean;
   last_triggered_at: string | null;
   discord_webhook_url: string | null;
+  telegram_bot_token: string | null;
+  telegram_chat_id: string | null;
 }
 
 export interface AlertConfig {
@@ -71,7 +73,7 @@ export async function postDiscord(
   await fetchImpl(webhookUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ content }),
+    body: JSON.stringify({ content, username: "Soulstone Alerts" }),
   });
 }
 
@@ -126,13 +128,15 @@ export async function checkAlerts(
 
     // webhook do PRÓPRIO alerta (self-service) ou o global (fallback do seed).
     const webhook = alert.discord_webhook_url ?? cfg.discord_webhook_url;
+    const tgToken = alert.telegram_bot_token ?? cfg.telegram_bot_token;
+    const tgChat = alert.telegram_chat_id ?? cfg.telegram_chat_id;
     let delivered = false;
     if (webhook) {
       await postDiscord(webhook, message);
       delivered = true;
     }
-    if (cfg.telegram_bot_token && cfg.telegram_chat_id) {
-      await postTelegram(cfg.telegram_bot_token, cfg.telegram_chat_id, message);
+    if (tgToken && tgChat) {
+      await postTelegram(tgToken, tgChat, message);
       delivered = true;
     }
     if (!delivered) continue;

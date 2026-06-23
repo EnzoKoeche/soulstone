@@ -73,21 +73,54 @@ export async function fetchStageDrops(): Promise<StageDrop[]> {
   }));
 }
 
-/** Cria um alerta de preço via a edge function pública create-alert. */
+export interface MyAlert {
+  id: number;
+  market_hash_name: string;
+  target_price_cents: number;
+  direction: string;
+  enabled: boolean;
+  last_triggered_at: string | null;
+}
+
+interface AlertsResponse {
+  error?: string;
+  alerts?: MyAlert[];
+}
+
+async function alertsFn(body: Record<string, unknown>): Promise<AlertsResponse> {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY ?? "";
+  if (!url) throw new Error(NOT_CONFIGURED);
+  const res = await fetch(`${url}/functions/v1/alerts`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: key, Authorization: `Bearer ${key}` },
+    body: JSON.stringify(body),
+  });
+  const data = (await res.json().catch(() => ({}))) as AlertsResponse;
+  if (!res.ok) throw new Error(data.error ?? `Erro ${res.status}`);
+  return data;
+}
+
+/** Cria um alerta (Discord ou Telegram) via a função pública alerts. */
 export async function createAlert(payload: {
   market_hash_name: string;
   target_price_cents: number;
   direction: "below" | "above";
-  discord_webhook_url: string;
+  channel: "discord" | "telegram";
+  discord_webhook_url?: string;
+  telegram_bot_token?: string;
+  telegram_chat_id?: string;
 }): Promise<void> {
-  const url = import.meta.env.VITE_SUPABASE_URL;
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY ?? "";
-  if (!url) throw new Error(NOT_CONFIGURED);
-  const res = await fetch(`${url}/functions/v1/create-alert`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", apikey: key, Authorization: `Bearer ${key}` },
-    body: JSON.stringify(payload),
-  });
-  const data = (await res.json().catch(() => ({}))) as { error?: string };
-  if (!res.ok) throw new Error(data.error ?? `Erro ${res.status}`);
+  await alertsFn({ action: "create", ...payload });
+}
+
+/** Lista os alertas de um webhook do Discord. */
+export async function listAlerts(discordWebhookUrl: string): Promise<MyAlert[]> {
+  const data = await alertsFn({ action: "list", discord_webhook_url: discordWebhookUrl });
+  return data.alerts ?? [];
+}
+
+/** Remove um alerta (só se pertencer ao webhook). */
+export async function deleteAlert(id: number, discordWebhookUrl: string): Promise<void> {
+  await alertsFn({ action: "delete", id, discord_webhook_url: discordWebhookUrl });
 }

@@ -9,6 +9,8 @@ const base: PriceAlert = {
   enabled: true,
   last_triggered_at: null,
   discord_webhook_url: null,
+  telegram_bot_token: null,
+  telegram_chat_id: null,
 };
 
 const NOW = 1_700_000_000_000;
